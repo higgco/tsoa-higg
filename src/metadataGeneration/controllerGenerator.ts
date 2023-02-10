@@ -4,6 +4,7 @@ import { GenerateMetadataError } from './exceptions';
 import { MetadataGenerator } from './metadataGenerator';
 import { MethodGenerator } from './methodGenerator';
 import { Tsoa } from './tsoa';
+import { TypeResolver } from './typeResolver';
 
 export class ControllerGenerator {
   private readonly path?: string;
@@ -16,6 +17,7 @@ export class ControllerGenerator {
     this.tags = this.getTags();
     this.security = this.getSecurity();
     this.isHidden = this.getIsHidden();
+    this.getExtraModels();
   }
 
   public IsValid() {
@@ -98,4 +100,18 @@ export class ControllerGenerator {
 
     return true;
   }
+
+  private getExtraModels() {
+    const decorators = getDecorators(this.node, identifier => identifier.text === 'ExtraModels');
+    if (!decorators || !decorators.length) {
+      return;
+    }
+    decorators.forEach(decorator => {
+      const parent = decorator.parent as ts.CallExpression;
+      (parent.typeArguments || []).forEach(node => {
+        new TypeResolver(node, this.current).resolve();
+      });
+    });
+  }
+
 }
