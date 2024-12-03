@@ -149,15 +149,15 @@ export abstract class SpecGenerator {
     if (dataType === 'object') {
       if (process.env.NODE_ENV !== 'tsoa_test') {
         // tslint:disable-next-line: no-console
-        console.warn(`The type Object is discouraged. Please consider using an interface such as:
-          export interface IStringToStringDictionary {
-            [key: string]: string;
-          }
-          // or
-          export interface IRecordOfAny {
-            [key: string]: any;
-          }
-        `);
+        // console.warn(`The type Object is discouraged. Please consider using an interface such as:
+        //   export interface IStringToStringDictionary {
+        //     [key: string]: string;
+        //   }
+        //   // or
+        //   export interface IRecordOfAny {
+        //     [key: string]: any;
+        //   }
+        // `);
       }
     }
 
