@@ -36,7 +36,7 @@ export class MethodGenerator {
       const typeChecker = this.current.typeChecker;
       const signature = typeChecker.getSignatureFromDeclaration(this.node);
       const implicitType = typeChecker.getReturnTypeOfSignature(signature!);
-      nodeType = typeChecker.typeToTypeNode(implicitType) as ts.TypeNode;
+      nodeType = typeChecker.typeToTypeNode(implicitType, undefined, undefined) as ts.TypeNode;
     }
     const type = new TypeResolver(nodeType, this.current).resolve();
     const responses = this.getMethodResponses();
@@ -44,7 +44,7 @@ export class MethodGenerator {
 
     return {
       deprecated: this.getIsDeprecated(),
-      description: getJSDocDescription(this.node),
+      description: getJSDocDescription(this.node)?.toString() ? getJSDocDescription(this.node)?.toString() : '',
       isHidden: this.getIsHidden(),
       method: this.method,
       name: (this.node.name as ts.Identifier).text,
@@ -53,7 +53,7 @@ export class MethodGenerator {
       path: this.path,
       responses,
       security: this.getSecurity(),
-      summary: getJSDocComment(this.node, 'summary'),
+      summary: getJSDocComment(this.node, 'summary')?.toString() ? getJSDocComment(this.node, 'summary')?.toString() : '',
       tags: this.getTags(),
       type,
     };
@@ -118,7 +118,9 @@ export class MethodGenerator {
     return decorators.map(decorator => {
       const expression = decorator.parent as ts.CallExpression;
 
-      const [name, description, examples] = getDecoratorValues(decorator, this.current.typeChecker);
+      const values = getDecoratorValues(decorator, this.current.typeChecker) || [];
+      const [name, description, examples] = values;
+
 
       return {
         description: description || '',
@@ -143,7 +145,8 @@ export class MethodGenerator {
       throw new GenerateMetadataError(`Only one SuccessResponse decorator allowed in '${this.getCurrentLocation}' method.`);
     }
 
-    const [name, description] = getDecoratorValues(decorators[0], this.current.typeChecker);
+    const values = getDecoratorValues(decorators[0], this.current.typeChecker) || [];
+    const [name, description] = values;
     const examples = this.getMethodSuccessExamples();
 
     return {

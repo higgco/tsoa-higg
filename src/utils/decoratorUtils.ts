@@ -1,22 +1,33 @@
 import * as ts from 'typescript';
 import { getInitializerValue } from '../metadataGeneration/initializer-value';
+import { Expression, LeftHandSideExpression } from 'typescript';
 
-export function getDecorators(node: ts.Node, isMatching: (identifier: ts.Identifier) => boolean) {
-  const decorators = node.decorators;
-  if (!decorators || !decorators.length) {
+export function getDecorators(
+  node: ts.Node,
+  isMatching: (identifier: ts.Identifier) => boolean
+): ts.Identifier[] {
+  // Ensure the node type supports decorators
+  if (!ts.canHaveDecorators(node)) {
     return [];
   }
 
+  const decorators = ts.getDecorators(node) ?? [];
+
   return decorators
-    .map((e: any) => {
-      while (e.expression !== undefined) {
-        e = e.expression;
+    .map((decorator: ts.Decorator) => {
+      let expr:LeftHandSideExpression | Expression = decorator.expression;
+
+      // Unwrap nested expressions (e.g., @Decorator(), @(() => Decorator)(), etc.)
+      while (ts.isCallExpression(expr) || ts.isParenthesizedExpression(expr)) {
+        expr = expr.expression;
       }
 
-      return e as ts.Identifier;
+      // Only return identifiers (ignore things like complex expressions)
+      return ts.isIdentifier(expr) ? expr : null;
     })
-    .filter(isMatching);
+    .filter((id): id is ts.Identifier => !!id && isMatching(id));
 }
+
 
 export function getNodeFirstDecoratorName(node: ts.Node, isMatching: (identifier: ts.Identifier) => boolean) {
   const decorators = getDecorators(node, isMatching);
@@ -46,7 +57,7 @@ export function getDecoratorValues(decorator: ts.Identifier, typeChecker: ts.Typ
 }
 
 export function getSecurites(decorator: ts.Identifier, typeChecker: ts.TypeChecker) {
-  const [first, second] = getDecoratorValues(decorator, typeChecker);
+  const [first, second] = getDecoratorValues(decorator, typeChecker) ?? [];
   if (isObject(first)) {
     return first;
   }

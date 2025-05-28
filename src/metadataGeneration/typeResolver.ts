@@ -11,6 +11,7 @@ const localReferenceTypeCache: { [typeName: string]: Tsoa.ReferenceType } = {};
 const inProgressTypes: { [typeName: string]: boolean } = {};
 
 type UsableDeclaration = ts.InterfaceDeclaration | ts.ClassDeclaration | ts.TypeAliasDeclaration | ts.PropertySignature;
+
 interface Context {
   [name: string]: ts.TypeReferenceNode | ts.TypeNode;
 }
@@ -106,7 +107,7 @@ export class TypeResolver {
           const property: Tsoa.Property = {
             default: getJSDocComment(propertySignature, 'default'),
             description: this.getNodeDescription(propertySignature),
-            format: this.getNodeFormat(propertySignature),
+            format: this.getNodeFormat(propertySignature)?.toString(),
             name: (propertySignature.name as ts.Identifier).text,
             required: !propertySignature.questionToken,
             type,
@@ -340,6 +341,7 @@ export class TypeResolver {
     const enumDeclaration = enumNodes[0] as ts.EnumDeclaration;
 
     const typeChecker = this.current.typeChecker;
+
     function getEnumValue(member: any) {
       const constantValue = typeChecker.getConstantValue(member);
       if (constantValue != null) {
@@ -781,7 +783,7 @@ export class TypeResolver {
 
       if (!typeNode) {
         const tsType = this.current.typeChecker.getTypeAtLocation(property);
-        typeNode = this.current.typeChecker.typeToTypeNode(tsType);
+        typeNode = this.current.typeChecker.typeToTypeNode(tsType, undefined, undefined);
       }
 
       if (!typeNode) {
@@ -959,7 +961,7 @@ export class TypeResolver {
   }
 
   private getNodeExample(node: UsableDeclaration | ts.PropertyDeclaration | ts.ParameterDeclaration | ts.EnumDeclaration) {
-    const example = getJSDocComment(node, 'example');
+    const example = getJSDocComment(node, 'example')?.toString();
 
     if (example) {
       return JSON.parse(example);
@@ -973,6 +975,7 @@ interface ResolvesToPrimitive {
   foundMatch: true;
   resolvedType: 'number' | 'string' | 'boolean' | 'void';
 }
+
 interface DoesNotResolveToPrimitive {
   foundMatch: false;
 }

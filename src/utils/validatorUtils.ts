@@ -14,7 +14,7 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
       if (!tag.comment) {
         return false;
       }
-      return value === tag.tagName.text && tag.comment.startsWith(parameterName);
+      return value === tag.tagName.text && typeof tag.comment === 'string' && tag.comment.startsWith(parameterName);
     });
   });
 
@@ -47,13 +47,13 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
       }
 
       const name = tag.tagName.text;
-      const comment = tag.comment.substr(tag.comment.indexOf(' ') + 1).trim();
-      const value = getValue(comment);
+      const comment = typeof tag.comment === 'string' && tag.comment?.substr(tag.comment.indexOf(' ') + 1).trim();
+      const value = getValue(comment?.toString() ?? '');
 
       switch (name) {
         case 'uniqueItems':
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment, false),
+            errorMsg: getErrorMsg(comment?.toString() ?? '', false),
             value: undefined,
           };
           break;
@@ -67,7 +67,7 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
             throw new GenerateMetadataError(`${name} parameter use number.`);
           }
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment),
+            errorMsg: getErrorMsg(comment?.toString() ?? ''),
             value: Number(value),
           };
           break;
@@ -77,7 +77,7 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
             throw new GenerateMetadataError(`${name} parameter use date format ISO 8601 ex. 2017-05-14, 2017-05-14T05:18Z`);
           }
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment),
+            errorMsg: getErrorMsg(comment?.toString() ?? ''),
             value,
           };
           break;
@@ -86,13 +86,13 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
             throw new GenerateMetadataError(`${name} patameter use string.`);
           }
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment),
+            errorMsg: getErrorMsg(comment?.toString() ?? ''),
             value,
           };
           break;
         default:
           if (name.startsWith('is')) {
-            const errorMsg = getErrorMsg(comment, false);
+            const errorMsg = getErrorMsg(comment?.toString() ?? '', false);
             if (errorMsg) {
               validateObj[name] = {
                 errorMsg,
@@ -138,12 +138,12 @@ export function getPropertyValidators(property: ts.PropertyDeclaration | ts.Prop
     (validateObj, tag) => {
       const name = tag.tagName.text;
       const comment = tag.comment;
-      const value = getValue(comment);
+      const value = getValue(comment?.toString() ?? '');
 
       switch (name) {
         case 'uniqueItems':
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment, false),
+            errorMsg: getErrorMsg(comment?.toString() ?? '', false),
             value: undefined,
           };
           break;
@@ -157,7 +157,7 @@ export function getPropertyValidators(property: ts.PropertyDeclaration | ts.Prop
             throw new GenerateMetadataError(`${name} parameter use number.`);
           }
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment),
+            errorMsg: getErrorMsg(comment?.toString() ?? ''),
             value: Number(value),
           };
           break;
@@ -167,7 +167,7 @@ export function getPropertyValidators(property: ts.PropertyDeclaration | ts.Prop
             throw new GenerateMetadataError(`${name} parameter use date format ISO 8601 ex. 2017-05-14, 2017-05-14T05:18Z`);
           }
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment),
+            errorMsg: getErrorMsg(comment?.toString() ?? ''),
             value,
           };
           break;
@@ -176,13 +176,13 @@ export function getPropertyValidators(property: ts.PropertyDeclaration | ts.Prop
             throw new GenerateMetadataError(`${name} patameter use string.`);
           }
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment),
+            errorMsg: getErrorMsg(comment?.toString() ?? ''),
             value,
           };
           break;
         default:
           if (name.startsWith('is')) {
-            const errorMsg = getErrorMsg(comment, false);
+            const errorMsg = getErrorMsg(comment?.toString() ?? '', false);
             if (errorMsg) {
               validateObj[name] = {
                 errorMsg,

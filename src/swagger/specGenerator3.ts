@@ -78,41 +78,71 @@ export class SpecGenerator3 extends SpecGenerator {
 
   private translateSecurityDefinitions(definitions: { [name: string]: Swagger.Security }) {
     const defs: { [name: string]: Swagger.Security } = {};
+
+    // Define correct shape expected by OpenAPI 3.0 OAuthFlow objects
+    type OAuthFlowObject = {
+      tokenUrl?: string;
+      authorizationUrl?: string;
+      refreshUrl?: string;
+      scopes: { [scope: string]: string };
+    };
+
     Object.keys(definitions).forEach(key => {
-      if (definitions[key].type === 'basic') {
+      const def = definitions[key];
+
+      if (def.type === 'basic') {
         defs[key] = {
           scheme: 'basic',
           type: 'http',
         } as Swagger.BasicSecurity3;
-      } else if (definitions[key].type === 'oauth2') {
-        const definition = definitions[key] as Swagger.OAuth2PasswordSecurity &
-          Swagger.OAuth2ApplicationSecurity &
-          Swagger.OAuth2ImplicitSecurity &
-          Swagger.OAuth2AccessCodeSecurity &
-          Swagger.OAuth2Security3;
-        const oauth = (defs[key] || {
-          type: 'oauth2',
-          description: definitions[key].description,
-          flows: definition.flows || {},
-        }) as Swagger.OAuth2Security3;
 
-        if (definition.flow === 'password') {
-          oauth.flows.password = { tokenUrl: definition.tokenUrl, scopes: definition.scopes || {} } as Swagger.OAuth2SecurityFlow3;
-        } else if (definition.flow === 'accessCode') {
-          oauth.flows.authorizationCode = { tokenUrl: definition.tokenUrl, authorizationUrl: definition.authorizationUrl, scopes: definition.scopes || {} } as Swagger.OAuth2SecurityFlow3;
-        } else if (definition.flow === 'application') {
-          oauth.flows.clientCredentials = { tokenUrl: definition.tokenUrl, scopes: definition.scopes || {} } as Swagger.OAuth2SecurityFlow3;
-        } else if (definition.flow === 'implicit') {
-          oauth.flows.implicit = { authorizationUrl: definition.authorizationUrl, scopes: definition.scopes || {} } as Swagger.OAuth2SecurityFlow3;
+      } else if (def.type === 'oauth2') {
+        const flows: {
+          password?: OAuthFlowObject;
+          clientCredentials?: OAuthFlowObject;
+          authorizationCode?: OAuthFlowObject;
+          implicit?: OAuthFlowObject;
+        } = {};
+
+        if (this.isOAuth2PasswordSecurity(def)) {
+          flows.password = {
+            tokenUrl: def.tokenUrl,
+            scopes: def.scopes || {},
+          };
+        } else if (this.isOAuth2AccessCodeSecurity(def)) {
+          flows.authorizationCode = {
+            authorizationUrl: def.authorizationUrl,
+            tokenUrl: def.tokenUrl,
+            scopes: def.scopes || {},
+          };
+        } else if (this.isOAuth2ApplicationSecurity(def)) {
+          flows.clientCredentials = {
+            tokenUrl: def.tokenUrl,
+            scopes: def.scopes || {},
+          };
+        } else if (this.isOAuth2ImplicitSecurity(def)) {
+          flows.implicit = {
+            authorizationUrl: def.authorizationUrl,
+            scopes: def.scopes || {},
+          };
         }
 
-        defs[key] = oauth;
+        defs[key] = {
+          type: 'oauth2',
+          description: def.description,
+          flows,
+        } as Swagger.OAuth2Security3;
+
       } else {
-        defs[key] = definitions[key];
+        defs[key] = def;
       }
     });
+
     return defs;
   }
+
+
+
 
   private buildServers() {
     const basePath = normalisePath(this.config.basePath as string, '/', undefined, false);
@@ -361,4 +391,21 @@ export class SpecGenerator3 extends SpecGenerator {
   protected getSwaggerTypeForIntersectionType(type: Tsoa.IntersectionType) {
     return { allOf: type.types.map(x => this.getSwaggerType(x)) };
   }
+
+  protected isOAuth2PasswordSecurity(def: Swagger.Security): def is Swagger.OAuth2PasswordSecurity {
+    return def.type === 'oauth2' && (def as any).flow === 'password';
+  }
+
+  protected isOAuth2AccessCodeSecurity(def: Swagger.Security): def is Swagger.OAuth2AccessCodeSecurity {
+    return def.type === 'oauth2' && (def as any).flow === 'accessCode';
+  }
+
+  protected isOAuth2ApplicationSecurity(def: Swagger.Security): def is Swagger.OAuth2ApplicationSecurity {
+    return def.type === 'oauth2' && (def as any).flow === 'application';
+  }
+
+  protected isOAuth2ImplicitSecurity(def: Swagger.Security): def is Swagger.OAuth2ImplicitSecurity {
+    return def.type === 'oauth2' && (def as any).flow === 'implicit';
+  }
+
 }

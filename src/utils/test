@@ -1,0 +1,86 @@
+{
+  "_id": "67cfc1e96a0f0d000cc92150",
+  "_rev": "5-840a1dcad93d975b8c98f629dc915528",
+  "type": "Account",
+  "name": "KOUYOUTEX CO.,LTD",
+  "accountType": "Facility",
+  "address": "",
+  "industrySectorType": [
+    "Apparel"
+  ],
+  "invites": {},
+  "requests": {},
+  "assessments": {},
+  "deletedAssessments": {},
+  "verifier": {},
+  "created_on": 1741668841686,
+  "approvalstatus": "Approved",
+  "sacId": 189199,
+  "sac_member": false,
+  "tagAssignments": {},
+  "customIds": {},
+  "users": {
+    "67cfbfee054cff000c80e3f4": {
+      "_id": "67cfbfee054cff000c80e3f4",
+      "email": "mid.night.ktc@gmail.com",
+      "status": "accepted",
+      "role": "owner",
+      "actions": []
+    }
+  },
+  "country": "Japan",
+  "vicinity": "福井市光陽",
+  "active": true,
+  "payments": [],
+  "actions": [
+    {
+      "user": {
+        "_id": "67cfbfee054cff000c80e3f4",
+        "email": "mid.night.ktc@gmail.com"
+      },
+      "date": 1741668841687,
+      "action": "Account created"
+    },
+    {
+      "user": {
+        "_id": "622e9feea812db000bc2c362",
+        "email": "ferdinand.bulay@worldly.io"
+      },
+      "date": 1741741109339,
+      "action": "Account approved by superuser"
+    }
+  ],
+  "subscriptions": {
+    "service_level_a": {
+      "purchase_date": 1741668841686
+    }
+  },
+  "testAccount": false,
+  "serviceLevel": "Basic",
+  "shareCredits": {
+    "fem": 0,
+    "fslm": 0,
+    "brm": 0,
+    "dct": -1
+  },
+  "lat": 36.06701899999999,
+  "long": 136.1987158,
+  "placeid": "ChIJTbS5cOC--F8RHd24-DNcBHY",
+  "showContentCard": true,
+  "dct_enabled": false,
+  "ffc_enabled": false,
+  "hubspotAccountId": "30958380096",
+  "subscriptionRecommendationHistory": [
+    {
+      "id": "c914cc1d-d7c2-4e59-97b8-9b5b520543ad",
+      "sku": "facsub25_b_fem_1y_1",
+      "lastCheckDate": 1746591131605,
+      "date": 1745380651013,
+      "isActive": true,
+      "reasons": [
+        "purchase-request"
+      ],
+      "reasonData": "assessmentTypes: fem"
+    }
+  ]
+}

@@ -1,0 +1,201 @@
+{
+  "_id": "682a8535749324000c9a040c",
+  "_rev": "21-3dc061158fbe44d2c957cc269c1dd29a",
+  "type": "Account",
+  "name": "BRANCH OF TOAN LOC INVESTMENT CONSTRUCTION IN GO QUAO - KIEN GIANG CO.,LTD",
+  "accountType": "Facility",
+  "address": "",
+  "industrySectorType": [
+    "Footwear"
+  ],
+  "invites": {
+    "quynhnhusea@hsvina.com": {
+      "email": "quynhnhusea@hsvina.com",
+      "date": 1748312012366,
+      "token": "bffa5395-46e4-427e-86f4-e698fa2491f4",
+      "role": "admin"
+    }
+  },
+  "requests": {},
+  "assessments": {
+    "dctsurvey:dfa3fa19-3785-4ed5-b426-16bbd593bc06": {
+      "_id": "dctsurvey:dfa3fa19-3785-4ed5-b426-16bbd593bc06",
+      "type": "dct",
+      "rfi_pid": "dct",
+      "surveyVersion": "2.0.0",
+      "status": "NS",
+      "verification": true,
+      "created_on": 1747918585002,
+      "cadence": "2025.05",
+      "name": "Open Submission",
+      "verifierPosted": false
+    }
+  },
+  "deletedAssessments": {},
+  "verifier": {},
+  "created_on": 1747617077047,
+  "approvalstatus": "Approved",
+  "sacId": 191053,
+  "sac_member": false,
+  "tagAssignments": {},
+  "customIds": {},
+  "users": {
+    "68283de4e79b57000c62e373": {
+      "_id": "68283de4e79b57000c62e373",
+      "email": "huynhnhuuf@hsvina.com",
+      "role": "owner",
+      "status": "accepted",
+      "actions": [
+        {
+          "user": {
+            "_id": "613fee86784c59000a032d04",
+            "email": "joanna.cadiang@worldly.io"
+          },
+          "date": 1747639380117,
+          "action": "User removed from account"
+        },
+        {
+          "user": {
+            "_id": "613fee86784c59000a032d04",
+            "email": "joanna.cadiang@worldly.io"
+          },
+          "date": 1747639481390,
+          "action": "User added to account by admin. Role admin"
+        },
+        {
+          "user": {
+            "_id": "613fee86784c59000a032d04",
+            "email": "joanna.cadiang@worldly.io"
+          },
+          "date": 1747639751632,
+          "action": "Role changed to owner"
+        }
+      ]
+    }
+  },
+  "country": "Viet Nam",
+  "vicinity": "LOT B2, ROAD NO. 3, VINH HOA HUNG NAM INDUSTRIAL PARK, GO QUAO DISTRICT, KIEN GIANG PROVINCE",
+  "active": true,
+  "payments": [
+    {
+      "id": "pi_3RRYfaINnKNGAesO0IJsPhHD",
+      "stripePaymentIntentId": "pi_3RRYfaINnKNGAesO0IJsPhHD",
+      "status": "succeeded",
+      "method": "Credit Card",
+      "account": "jcb 1064",
+      "date": 1747918584899,
+      "description": "Light x1",
+      "price": 29900,
+      "user": {
+        "_id": "68283de4e79b57000c62e373",
+        "email": "huynhnhuuf@hsvina.com"
+      },
+      "attemptedAllocations": [
+        "682a8535749324000c9a040c"
+      ],
+      "hubspotPaymentId": "28203290952",
+      "products": [
+        "facsub25_a_1y_1"
+      ],
+      "successfulAllocations": [
+        "682a8535749324000c9a040c:facsub25_a_1y_1"
+      ],
+      "failedAllocations": [],
+      "invoices": [
+        {
+          "gwId": "IN",
+          "id": "DbD1VogKdl",
+          "number": "108098"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "user": {
+        "_id": "68283de4e79b57000c62e373",
+        "email": "huynhnhuuf@hsvina.com"
+      },
+      "date": 1747617077049,
+      "action": "Account created"
+    },
+    {
+      "user": {
+        "_id": "65dc2c15c0359c000c981d8b",
+        "email": "simon.wee@worldly.io"
+      },
+      "date": 1747639166584,
+      "action": "Account approved by superuser"
+    },
+    {
+      "user": {
+        "_id": "613fee86784c59000a032d04",
+        "email": "joanna.cadiang@worldly.io"
+      },
+      "date": 1747639438054,
+      "action": "Account declined by superuser"
+    },
+    {
+      "user": {
+        "_id": "613fee86784c59000a032d04",
+        "email": "joanna.cadiang@worldly.io"
+      },
+      "date": 1747639467049,
+      "action": "Account approved by superuser"
+    },
+    {
+      "user": {
+        "_id": "613fee86784c59000a032d04",
+        "email": "joanna.cadiang@worldly.io"
+      },
+      "date": 1747639468727,
+      "action": "Account approved by superuser"
+    }
+  ],
+  "subscriptions": {
+    "service_level_a": {
+      "purchase_date": 1747617077047
+    },
+    "facilitySubscription": {
+      "purchase_date": 1747918584959,
+      "expires": 1779454584959,
+      "sku": "facsub25_a_1y_1",
+      "history": [],
+      "rfi_pids": [
+        "ffc",
+        "dct"
+      ]
+    }
+  },
+  "testAccount": false,
+  "website": "https://mail.hsvina.com/",
+  "serviceLevel": "Basic",
+  "shareCredits": {
+    "fem": 0,
+    "fslm": 0,
+    "brm": 0,
+    "dct": -1
+  },
+  "taxId": "0301790859007",
+  "showContentCard": true,
+  "dct_enabled": true,
+  "ffc_enabled": true,
+  "hubspotAccountId": "33613244196",
+  "approveDeclineMessage": "05/19/25 - Registration is Clear. Default Config. Approved. - Joan\n- Have error in Saving Address and add notes on support notes",
+  "stripeCustomerId": "cus_SMHEXIIyCy1wdT",
+  "stopDctAutomaticRenewOn": 1779454584959,
+  "invoiceNinjaId": "1aKOk7RnaQ",
+  "subscriptionRecommendationHistory": [
+    {
+      "id": "452dcae9-7c03-47c7-9d52-c526b595790b",
+      "sku": "facsub25_b_fem_1y_1",
+      "lastCheckDate": 1748230661937,
+      "date": 1747918601158,
+      "isActive": true,
+      "reasons": [
+        "default"
+      ],
+      "reasonData": "assessmentTypes: "
+    }
+  ]
+}
