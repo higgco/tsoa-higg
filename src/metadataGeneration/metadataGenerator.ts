@@ -1,4 +1,4 @@
-import * as mm from 'minimatch';
+import minimatch from 'minimatch';
 import * as ts from 'typescript';
 import { importClassesFromDirectories } from '../utils/importClassesFromDirectories';
 import { ControllerGenerator } from './controllerGenerator';
@@ -12,6 +12,7 @@ export class MetadataGenerator {
   private readonly program: ts.Program;
   private referenceTypeMap: Tsoa.ReferenceTypeMap = {};
   private circularDependencyResolvers = new Array<(referenceTypes: Tsoa.ReferenceTypeMap) => void>();
+  private controllers = new Array<Tsoa.Controller>();
 
   public IsExportedNode(node: ts.Node) {
     return true;
@@ -25,13 +26,12 @@ export class MetadataGenerator {
 
   public Generate(): Tsoa.Metadata {
     this.extractNodeFromProgramSourceFiles();
-
-    const controllers = this.buildControllers();
+    this.buildControllers();
 
     this.circularDependencyResolvers.forEach(c => c(this.referenceTypeMap));
 
     return {
-      controllers,
+      controllers: this.controllers,
       referenceTypeMap: this.referenceTypeMap,
     };
   }
@@ -49,7 +49,7 @@ export class MetadataGenerator {
     this.program.getSourceFiles().forEach(sf => {
       if (this.ignorePaths && this.ignorePaths.length) {
         for (const path of this.ignorePaths) {
-          if (mm(sf.fileName, path)) {
+          if (minimatch(sf.fileName, path)) {
             return;
           }
         }
@@ -81,10 +81,11 @@ export class MetadataGenerator {
   }
 
   private buildControllers() {
-    return this.nodes
-      .filter(node => node.kind === ts.SyntaxKind.ClassDeclaration && this.IsExportedNode(node as ts.ClassDeclaration))
-      .map((classDeclaration: ts.ClassDeclaration) => new ControllerGenerator(classDeclaration, this))
-      .filter(generator => generator.IsValid())
-      .map(generator => generator.Generate());
+    this.nodes
+      .filter((node): node is ts.ClassDeclaration => ts.isClassDeclaration(node))
+      .forEach(classDeclaration => {
+        const controller = new ControllerGenerator(classDeclaration, this);
+        this.controllers.push(controller.Generate());
+      });
   }
 }

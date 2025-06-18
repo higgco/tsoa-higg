@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 import * as validator from 'validator';
 import { assertNever } from '../utils/assertNever';
 import { warnAdditionalPropertiesDeprecation } from '../utils/deprecations';
@@ -104,9 +104,9 @@ export class ValidationService {
     if (!nestedProperties) {
       throw new Error(
         'internal tsoa error: ' +
-          'the metadata that was generated should have had nested property schemas since it’s for a nested object,' +
-          'however it did not. ' +
-          'Please file an issue with tsoa at https://github.com/lukeautry/tsoa/issues',
+        'the metadata that was generated should have had nested property schemas since it\'s for a nested object, ' +
+        'however it did not. ' +
+        'Please file an issue with tsoa at https://github.com/lukeautry/tsoa/issues'
       );
     }
 
@@ -459,8 +459,8 @@ export class ValidationService {
     if (!subSchemas) {
       throw new Error(
         'internal tsoa error: ' +
-          'the metadata that was generated should have had sub schemas since it’s for a union, however it did not. ' +
-          'Please file an issue with tsoa at https://github.com/lukeautry/tsoa/issues',
+        'the metadata that was generated should have had sub schemas since it\'s for a union, however it did not. ' +
+        'Please file an issue with tsoa at https://github.com/lukeautry/tsoa/issues'
       );
     }
 
@@ -496,8 +496,8 @@ export class ValidationService {
     if (!subSchemas) {
       throw new Error(
         'internal tsoa error: ' +
-          'the metadata that was generated should have had sub schemas since it’s for a intersection, however it did not. ' +
-          'Please file an issue with tsoa at https://github.com/lukeautry/tsoa/issues',
+        'the metadata that was generated should have had sub schemas since it\'s for a intersection, however it did not. ' +
+        'Please file an issue with tsoa at https://github.com/lukeautry/tsoa/issues'
       );
     }
 
@@ -530,37 +530,18 @@ export class ValidationService {
       return cleanValues;
     }
 
-    // Only Model definitions make sense here right now
-    const refNames = subSchemas.filter(subschema => subschema.ref).map(subschema => subschema.ref) as string[];
-    if (!refNames.every(refName => this.models[refName])) {
-      return value;
-    }
+    const refNames = new Set<string>(subSchemas.map(s => s.ref).filter((ref): ref is string => ref !== undefined));
+    const excessProperties = Array.from(refNames)
+      .map(refName => this.models[refName])
+      .filter((subSchema): subSchema is TsoaRoute.ModelSchema => subSchema !== undefined)
+      .reduce<string[]>((acc, subSchema) => {
+        const properties = Object.keys(value);
+        return [...acc, ...this.getExcessPropertiesFor(subSchema, properties, swaggerConfig)];
+      }, []);
 
-    const reportedExcess = new Set(
-      refNames
-        .map(refName => this.models[refName])
-        .reduce((acc, subSchema) => {
-          return [...acc, ...this.getExcessPropertiesFor(subSchema, Object.keys(value), swaggerConfig)];
-        }, []),
-    );
-
-    if (reportedExcess.size === 0) {
-      return value;
-    }
-
-    const allowedProperties = new Set(
-      refNames
-        .map(refName => this.models[refName])
-        .reduce((acc, subSchema) => {
-          return [...acc, ...this.getPropertiesFor(subSchema)];
-        }, []),
-    );
-
-    const actualExcess = [...reportedExcess].filter(property => !allowedProperties.has(property));
-
-    if (actualExcess.length > 0) {
+    if (excessProperties.length > 0) {
       fieldErrors[parent + name] = {
-        message: `The following properties are not allowed by any part of the intersection: ${actualExcess}`,
+        message: `The following properties are not allowed by any part of the intersection: ${excessProperties}`,
         value,
       };
     }
@@ -578,11 +559,6 @@ export class ValidationService {
     } else {
       return assertNever(swaggerConfig.noImplicitAdditionalProperties);
     }
-  }
-
-  private getPropertiesFor(modelDefinition: TsoaRoute.ModelSchema) {
-    const properties = !!modelDefinition && modelDefinition.dataType === 'refObject' ? modelDefinition.properties : {};
-    return new Set(Object.keys(properties));
   }
 
   private getExcessPropertiesFor(modelDefinition: TsoaRoute.ModelSchema, properties: string[], config: SwaggerConfigRelatedToRoutes): string[] {

@@ -99,22 +99,7 @@ export class TypeResolver {
     }
 
     if (ts.isTypeLiteralNode(this.typeNode)) {
-      const properties = this.typeNode.members
-        .filter(member => ts.isPropertySignature(member))
-        .reduce((res, propertySignature: ts.PropertySignature) => {
-          const type = new TypeResolver(propertySignature.type as ts.TypeNode, this.current, propertySignature, this.extractEnum, this.context).resolve();
-          const property: Tsoa.Property = {
-            default: getJSDocComment(propertySignature, 'default'),
-            description: this.getNodeDescription(propertySignature),
-            format: this.getNodeFormat(propertySignature),
-            name: (propertySignature.name as ts.Identifier).text,
-            required: !propertySignature.questionToken,
-            type,
-            validators: getPropertyValidators(propertySignature) || {},
-          };
-
-          return [property, ...res];
-        }, []);
+      const properties = this.getProperties(this.typeNode as ts.TypeLiteralNode);
 
       const indexMember = this.typeNode.members.find(member => ts.isIndexSignatureDeclaration(member));
       let additionalType: Tsoa.Type | undefined;
@@ -720,7 +705,7 @@ export class TypeResolver {
           return {
             default: getJSDocComment(propertyDeclaration, 'default'),
             description: this.getNodeDescription(propertyDeclaration),
-            format: this.getNodeFormat(propertyDeclaration),
+            format: this.getNodeFormat(propertyDeclaration)?.toString(),
             name: identifier.text,
             required: !propertyDeclaration.questionToken,
             type: new TypeResolver(propertyDeclaration.type, this.current, propertyDeclaration.type.parent, this.extractEnum, this.context).resolve(),
@@ -781,7 +766,7 @@ export class TypeResolver {
 
       if (!typeNode) {
         const tsType = this.current.typeChecker.getTypeAtLocation(property);
-        typeNode = this.current.typeChecker.typeToTypeNode(tsType);
+        typeNode = this.current.typeChecker.typeToTypeNode(tsType, undefined, undefined);
       }
 
       if (!typeNode) {
@@ -793,7 +778,7 @@ export class TypeResolver {
       return {
         default: getInitializerValue(property.initializer, this.current.typeChecker, type),
         description: this.getNodeDescription(property),
-        format: this.getNodeFormat(property),
+        format: this.getNodeFormat(property)?.toString(),
         name: identifier.text,
         required: !property.questionToken && !property.initializer,
         type,
@@ -962,10 +947,29 @@ export class TypeResolver {
     const example = getJSDocComment(node, 'example');
 
     if (example) {
-      return JSON.parse(example);
+      return JSON.parse(example?.toString() || '{}');
     } else {
       return undefined;
     }
+  }
+
+  private getProperties(node: ts.TypeLiteralNode): Tsoa.Property[] {
+    return node.members
+      .filter((member): member is ts.PropertySignature => ts.isPropertySignature(member))
+      .reduce((res: Tsoa.Property[], propertySignature) => {
+        const type = new TypeResolver(propertySignature.type as ts.TypeNode, this.current, propertySignature, this.extractEnum, this.context).resolve();
+        const property: Tsoa.Property = {
+          default: getJSDocComment(propertySignature, 'default'),
+          description: this.getNodeDescription(propertySignature),
+          format: this.getNodeFormat(propertySignature)?.toString(),
+          name: (propertySignature.name as ts.Identifier).text,
+          required: !propertySignature.questionToken,
+          type,
+          validators: getPropertyValidators(propertySignature) || {},
+        };
+        res.push(property);
+        return res;
+      }, []);
   }
 }
 

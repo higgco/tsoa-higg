@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 import * as ts from 'typescript';
 import { GenerateMetadataError } from './../metadataGeneration/exceptions';
 import { Tsoa } from './../metadataGeneration/tsoa';
@@ -11,7 +11,7 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
 
   const tags = getJSDocTags(parameter.parent, tag => {
     return getParameterTagSupport().some(value => {
-      if (!tag.comment) {
+      if (!tag.comment || typeof tag.comment !== 'string') {
         return false;
       }
       return value === tag.tagName.text && tag.comment.startsWith(parameterName);
@@ -19,14 +19,14 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
   });
 
   function getValue(comment?: string) {
-    if (!comment) {
-      return;
+    if (!comment || typeof comment !== 'string') {
+      return undefined;
     }
     return comment.split(' ')[0];
   }
   function getErrorMsg(comment?: string, isValue = true) {
-    if (!comment) {
-      return;
+    if (!comment || typeof comment !== 'string') {
+      return undefined;
     }
     if (isValue) {
       const indexOf = comment.indexOf(' ');
@@ -42,7 +42,7 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
 
   return tags.reduce(
     (validateObj, tag) => {
-      if (!tag.comment) {
+      if (!tag.comment || typeof tag.comment !== 'string') {
         return validateObj;
       }
 
@@ -53,7 +53,7 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
       switch (name) {
         case 'uniqueItems':
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment, false),
+            errorMsg: getErrorMsg(typeof comment === 'string' ? comment : undefined, false),
             value: undefined,
           };
           break;
@@ -67,17 +67,17 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
             throw new GenerateMetadataError(`${name} parameter use number.`);
           }
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment),
+            errorMsg: getErrorMsg(typeof comment === 'string' ? comment : undefined),
             value: Number(value),
           };
           break;
         case 'minDate':
         case 'maxDate':
-          if (!moment(value, moment.ISO_8601, true).isValid()) {
+          if (!moment(value as string, moment.ISO_8601, true).isValid()) {
             throw new GenerateMetadataError(`${name} parameter use date format ISO 8601 ex. 2017-05-14, 2017-05-14T05:18Z`);
           }
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment),
+            errorMsg: getErrorMsg(typeof comment === 'string' ? comment : undefined),
             value,
           };
           break;
@@ -86,13 +86,13 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
             throw new GenerateMetadataError(`${name} patameter use string.`);
           }
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment),
+            errorMsg: getErrorMsg(typeof comment === 'string' ? comment : undefined),
             value,
           };
           break;
         default:
           if (name.startsWith('is')) {
-            const errorMsg = getErrorMsg(comment, false);
+            const errorMsg = getErrorMsg(typeof comment === 'string' ? comment : undefined, false);
             if (errorMsg) {
               validateObj[name] = {
                 errorMsg,
@@ -138,12 +138,12 @@ export function getPropertyValidators(property: ts.PropertyDeclaration | ts.Prop
     (validateObj, tag) => {
       const name = tag.tagName.text;
       const comment = tag.comment;
-      const value = getValue(comment);
+      const value = getValue(typeof comment === 'string' ? comment : undefined);
 
       switch (name) {
         case 'uniqueItems':
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment, false),
+            errorMsg: getErrorMsg(typeof comment === 'string' ? comment : undefined, false),
             value: undefined,
           };
           break;
@@ -157,17 +157,17 @@ export function getPropertyValidators(property: ts.PropertyDeclaration | ts.Prop
             throw new GenerateMetadataError(`${name} parameter use number.`);
           }
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment),
+            errorMsg: getErrorMsg(typeof comment === 'string' ? comment : undefined),
             value: Number(value),
           };
           break;
         case 'minDate':
         case 'maxDate':
-          if (!moment(value, moment.ISO_8601, true).isValid()) {
+          if (!moment(value as string, moment.ISO_8601, true).isValid()) {
             throw new GenerateMetadataError(`${name} parameter use date format ISO 8601 ex. 2017-05-14, 2017-05-14T05:18Z`);
           }
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment),
+            errorMsg: getErrorMsg(typeof comment === 'string' ? comment : undefined),
             value,
           };
           break;
@@ -176,13 +176,13 @@ export function getPropertyValidators(property: ts.PropertyDeclaration | ts.Prop
             throw new GenerateMetadataError(`${name} patameter use string.`);
           }
           validateObj[name] = {
-            errorMsg: getErrorMsg(comment),
+            errorMsg: getErrorMsg(typeof comment === 'string' ? comment : undefined),
             value,
           };
           break;
         default:
           if (name.startsWith('is')) {
-            const errorMsg = getErrorMsg(comment, false);
+            const errorMsg = getErrorMsg(typeof comment === 'string' ? comment : undefined, false);
             if (errorMsg) {
               validateObj[name] = {
                 errorMsg,

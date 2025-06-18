@@ -9,8 +9,8 @@ import { Tsoa } from './tsoa';
 import { TypeResolver } from './typeResolver';
 
 export class MethodGenerator {
-  private method: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
-  private path: string;
+  private method!: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
+  private path!: string;
 
   constructor(
     private readonly node: ts.MethodDeclaration,
@@ -36,7 +36,7 @@ export class MethodGenerator {
       const typeChecker = this.current.typeChecker;
       const signature = typeChecker.getSignatureFromDeclaration(this.node);
       const implicitType = typeChecker.getReturnTypeOfSignature(signature!);
-      nodeType = typeChecker.typeToTypeNode(implicitType) as ts.TypeNode;
+      nodeType = typeChecker.typeToTypeNode(implicitType, undefined, undefined) as ts.TypeNode;
     }
     const type = new TypeResolver(nodeType, this.current).resolve();
     const responses = this.getMethodResponses();
@@ -44,7 +44,7 @@ export class MethodGenerator {
 
     return {
       deprecated: this.getIsDeprecated(),
-      description: getJSDocDescription(this.node),
+      description: getJSDocDescription(this.node)?.toString(),
       isHidden: this.getIsHidden(),
       method: this.method,
       name: (this.node.name as ts.Identifier).text,
@@ -53,7 +53,7 @@ export class MethodGenerator {
       path: this.path,
       responses,
       security: this.getSecurity(),
-      summary: getJSDocComment(this.node, 'summary'),
+      summary: getJSDocComment(this.node, 'summary')?.toString(),
       tags: this.getTags(),
       type,
     };
@@ -92,7 +92,7 @@ export class MethodGenerator {
     const pathDecorators = getDecorators(this.node, identifier => this.supportsPathMethod(identifier.text));
 
     if (!pathDecorators || !pathDecorators.length) {
-      return;
+      return undefined;
     }
     if (pathDecorators.length > 1) {
       throw new GenerateMetadataError(`Only one path decorator in '${this.getCurrentLocation}' method, Found: ${pathDecorators.map(d => d.text).join(', ')}`);
@@ -103,10 +103,8 @@ export class MethodGenerator {
     const decoratorArgument = expression.arguments[0] as ts.StringLiteral;
 
     this.method = decorator.text.toLowerCase() as any;
-    // if you don't pass in a path to the method decorator, we'll just use the base route
-    // todo: what if someone has multiple no argument methods of the same type in a single controller?
-    // we need to throw an error there
     this.path = decoratorArgument ? `${decoratorArgument.text}` : '';
+    return undefined;
   }
 
   private getMethodResponses(): Tsoa.Response[] {
@@ -118,7 +116,9 @@ export class MethodGenerator {
     return decorators.map(decorator => {
       const expression = decorator.parent as ts.CallExpression;
 
-      const [name, description, examples] = getDecoratorValues(decorator, this.current.typeChecker);
+      const decoratorValues = getDecoratorValues(decorator, this.current.typeChecker);
+      if (!decoratorValues) throw new Error('Decorator values not found');
+      const [name, description, examples] = decoratorValues;
 
       return {
         description: description || '',
@@ -143,7 +143,9 @@ export class MethodGenerator {
       throw new GenerateMetadataError(`Only one SuccessResponse decorator allowed in '${this.getCurrentLocation}' method.`);
     }
 
-    const [name, description] = getDecoratorValues(decorators[0], this.current.typeChecker);
+    const decoratorValues = getDecoratorValues(decorators[0], this.current.typeChecker);
+    if (!decoratorValues) throw new Error('Decorator values not found');
+    const [name, description] = decoratorValues;
     const examples = this.getMethodSuccessExamples();
 
     return {

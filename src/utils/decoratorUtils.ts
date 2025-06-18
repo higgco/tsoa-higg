@@ -3,16 +3,16 @@ import { getInitializerValue } from '../metadataGeneration/initializer-value';
 
 export function getDecorators(node: ts.Node, isMatching: (identifier: ts.Identifier) => boolean) {
   const decorators = node.decorators;
-  if (!decorators || !decorators.length) {
+  const decoratorsArr: ts.Decorator[] = Array.isArray(decorators) ? decorators : [];
+  if (decoratorsArr.length === 0) {
     return [];
   }
 
-  return decorators
+  return decoratorsArr
     .map((e: any) => {
       while (e.expression !== undefined) {
         e = e.expression;
       }
-
       return e as ts.Identifier;
     })
     .filter(isMatching);
@@ -46,7 +46,11 @@ export function getDecoratorValues(decorator: ts.Identifier, typeChecker: ts.Typ
 }
 
 export function getSecurites(decorator: ts.Identifier, typeChecker: ts.TypeChecker) {
-  const [first, second] = getDecoratorValues(decorator, typeChecker);
+  const decoratorValues = getDecoratorValues(decorator, typeChecker);
+  if (!decoratorValues || !Array.isArray(decoratorValues)) {
+    return [undefined, undefined];
+  }
+  const [first, second] = decoratorValues;
   if (isObject(first)) {
     return first;
   }
