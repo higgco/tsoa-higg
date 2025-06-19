@@ -436,7 +436,7 @@ describe('Koa Server (with noImplicitAdditionalProperties turned on)', () => {
           }
 
           verifyResponse(parsedError, res);
-          resolve();
+          resolve(undefined);
         });
     });
   }

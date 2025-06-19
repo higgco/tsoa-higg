@@ -194,7 +194,10 @@ export class ParameterGenerator {
     let typeNode = parameter.type;
     if (!typeNode) {
       const type = this.current.typeChecker.getTypeAtLocation(parameter);
-      typeNode = this.current.typeChecker.typeToTypeNode(type) as ts.TypeNode;
+      typeNode = this.current.typeChecker.typeToTypeNode(type, undefined, undefined);
+    }
+    if (!typeNode) {
+      throw new Error('typeNode is undefined');
     }
     return new TypeResolver(typeNode, this.current, parameter, extractEnum).resolve();
   }

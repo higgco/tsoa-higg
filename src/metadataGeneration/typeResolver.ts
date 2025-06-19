@@ -781,7 +781,7 @@ export class TypeResolver {
 
       if (!typeNode) {
         const tsType = this.current.typeChecker.getTypeAtLocation(property);
-        typeNode = this.current.typeChecker.typeToTypeNode(tsType);
+        typeNode = this.current.typeChecker.typeToTypeNode(tsType, undefined, undefined);
       }
 
       if (!typeNode) {
@@ -955,14 +955,15 @@ export class TypeResolver {
   }
 
   private getNodeFormat(node: UsableDeclaration | ts.PropertyDeclaration | ts.ParameterDeclaration | ts.EnumDeclaration) {
-    return getJSDocComment(node, 'format');
+    const formatValue = this.getNodeFormat(node);
+    return typeof formatValue === 'string' ? formatValue : undefined;
   }
 
   private getNodeExample(node: UsableDeclaration | ts.PropertyDeclaration | ts.ParameterDeclaration | ts.EnumDeclaration) {
     const example = getJSDocComment(node, 'example');
 
     if (example) {
-      return JSON.parse(example);
+      return typeof example === 'string' ? JSON.parse(example) : undefined;
     } else {
       return undefined;
     }

@@ -966,7 +966,7 @@ describe('Hapi Server', () => {
           }
 
           verifyResponse(parsedError, res);
-          resolve();
+          resolve(undefined);
         });
     });
   }

@@ -1,46 +1,52 @@
 import * as ts from 'typescript';
 import { getInitializerValue } from '../metadataGeneration/initializer-value';
 
-export function getDecorators(node: ts.Node, isMatching: (identifier: ts.Identifier) => boolean) {
-  const decorators = node.decorators;
-  if (!decorators || !decorators.length) {
+export function getDecorators(node: ts.Node, isMatching: (identifier: ts.Identifier) => boolean): ts.Identifier[] {
+  const decorators: ts.NodeArray<ts.Decorator> | undefined = node.decorators;
+  const decoratorsAny = decorators as any;
+  if (!decoratorsAny || decoratorsAny.length === 0) {
     return [];
   }
 
-  return decorators
-    .map((e: any) => {
-      while (e.expression !== undefined) {
-        e = e.expression;
+  return decoratorsAny
+    .map((e: ts.Decorator) => {
+      let expr = e.expression;
+      while (ts.isDecorator(expr) || ts.isCallExpression(expr)) {
+        // Unwrap nested decorators or call expressions
+        expr = (expr as any).expression;
       }
-
-      return e as ts.Identifier;
+      if (ts.isIdentifier(expr)) {
+        return expr;
+      }
+      return undefined;
     })
+    .filter((id: ts.Identifier | undefined): id is ts.Identifier => !!id)
     .filter(isMatching);
 }
 
-export function getNodeFirstDecoratorName(node: ts.Node, isMatching: (identifier: ts.Identifier) => boolean) {
+export function getNodeFirstDecoratorName(node: ts.Node, isMatching: (identifier: ts.Identifier) => boolean): string | undefined {
   const decorators = getDecorators(node, isMatching);
-  if (!decorators || !decorators.length) {
+  if (!decorators || decorators.length === 0) {
     return;
   }
 
   return decorators[0].text;
 }
 
-export function getNodeFirstDecoratorValue(node: ts.Node, typeChecker: ts.TypeChecker, isMatching: (identifier: ts.Identifier) => boolean) {
+export function getNodeFirstDecoratorValue(node: ts.Node, typeChecker: ts.TypeChecker, isMatching: (identifier: ts.Identifier) => boolean): any {
   const decorators = getDecorators(node, isMatching);
-  if (!decorators || !decorators.length) {
+  if (!decorators || decorators.length === 0) {
     return;
   }
   const values = getDecoratorValues(decorators[0], typeChecker);
   return values && values[0];
 }
 
-export function getDecoratorValues(decorator: ts.Identifier, typeChecker: ts.TypeChecker) {
+export function getDecoratorValues(decorator: ts.Identifier, typeChecker: ts.TypeChecker): any[] {
   const expression = decorator.parent as ts.CallExpression;
   const expArguments = expression.arguments;
-  if (!expArguments || !expArguments.length) {
-    return;
+  if (!expArguments || expArguments.length === 0) {
+    return [];
   }
   return expArguments.map(a => getInitializerValue(a, typeChecker));
 }
@@ -53,9 +59,9 @@ export function getSecurites(decorator: ts.Identifier, typeChecker: ts.TypeCheck
   return { [first]: second || [] };
 }
 
-export function isDecorator(node: ts.Node, isMatching: (identifier: ts.Identifier) => boolean) {
+export function isDecorator(node: ts.Node, isMatching: (identifier: ts.Identifier) => boolean): boolean {
   const decorators = getDecorators(node, isMatching);
-  if (!decorators || !decorators.length) {
+  if (!decorators || decorators.length === 0) {
     return false;
   }
   return true;

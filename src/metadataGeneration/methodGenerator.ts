@@ -36,15 +36,18 @@ export class MethodGenerator {
       const typeChecker = this.current.typeChecker;
       const signature = typeChecker.getSignatureFromDeclaration(this.node);
       const implicitType = typeChecker.getReturnTypeOfSignature(signature!);
-      nodeType = typeChecker.typeToTypeNode(implicitType) as ts.TypeNode;
+      nodeType = typeChecker.typeToTypeNode(implicitType, undefined, undefined) as ts.TypeNode;
     }
     const type = new TypeResolver(nodeType, this.current).resolve();
     const responses = this.getMethodResponses();
     responses.push(this.getMethodSuccessResponse(type));
 
+    const desc = getJSDocDescription(this.node);
+    const summ = getJSDocComment(this.node, 'summary');
+
     return {
       deprecated: this.getIsDeprecated(),
-      description: getJSDocDescription(this.node),
+      description: typeof desc === 'string' ? desc : undefined,
       isHidden: this.getIsHidden(),
       method: this.method,
       name: (this.node.name as ts.Identifier).text,
@@ -53,7 +56,7 @@ export class MethodGenerator {
       path: this.path,
       responses,
       security: this.getSecurity(),
-      summary: getJSDocComment(this.node, 'summary'),
+      summary: typeof summ === 'string' ? summ : undefined,
       tags: this.getTags(),
       type,
     };
@@ -95,7 +98,7 @@ export class MethodGenerator {
       return;
     }
     if (pathDecorators.length > 1) {
-      throw new GenerateMetadataError(`Only one path decorator in '${this.getCurrentLocation}' method, Found: ${pathDecorators.map(d => d.text).join(', ')}`);
+      throw new GenerateMetadataError(`Only one path decorator in '${this.getCurrentLocation()}' method, Found: ${pathDecorators.map(d => d.text).join(', ')}`);
     }
 
     const decorator = pathDecorators[0];
@@ -117,13 +120,12 @@ export class MethodGenerator {
 
     return decorators.map(decorator => {
       const expression = decorator.parent as ts.CallExpression;
-
-      const [name, description, examples] = getDecoratorValues(decorator, this.current.typeChecker);
-
+      const values = getDecoratorValues(decorator, this.current.typeChecker);
+      const [name = '200', description, examples] = Array.isArray(values) ? values : [];
       return {
-        description: description || '',
+        description: typeof description === 'string' ? description : '',
         examples,
-        name: name || '200',
+        name: typeof name === 'string' ? name : '200',
         schema: expression.typeArguments && expression.typeArguments.length > 0 ? new TypeResolver(expression.typeArguments[0], this.current).resolve() : undefined,
       } as Tsoa.Response;
     });
@@ -140,16 +142,15 @@ export class MethodGenerator {
       };
     }
     if (decorators.length > 1) {
-      throw new GenerateMetadataError(`Only one SuccessResponse decorator allowed in '${this.getCurrentLocation}' method.`);
+      throw new GenerateMetadataError(`Only one SuccessResponse decorator allowed in '${this.getCurrentLocation()}' method.`);
     }
-
-    const [name, description] = getDecoratorValues(decorators[0], this.current.typeChecker);
+    const values = getDecoratorValues(decorators[0], this.current.typeChecker);
+    const [name = '200', description] = Array.isArray(values) ? values : [];
     const examples = this.getMethodSuccessExamples();
-
     return {
-      description: description || '',
+      description: typeof description === 'string' ? description : '',
       examples,
-      name: name || '200',
+      name: typeof name === 'string' ? name : '200',
       schema: type,
     };
   }
@@ -160,7 +161,7 @@ export class MethodGenerator {
       return undefined;
     }
     if (exampleDecorators.length > 1) {
-      throw new GenerateMetadataError(`Only one Example decorator allowed in '${this.getCurrentLocation}' method.`);
+      throw new GenerateMetadataError(`Only one Example decorator allowed in '${this.getCurrentLocation()}' method.`);
     }
     const values = getDecoratorValues(exampleDecorators[0], this.current.typeChecker);
     return values && values[0];
@@ -179,7 +180,7 @@ export class MethodGenerator {
       return false;
     }
     if (depDecorators.length > 1) {
-      throw new GenerateMetadataError(`Only one Deprecated decorator allowed in '${this.getCurrentLocation}' method.`);
+      throw new GenerateMetadataError(`Only one Deprecated decorator allowed in '${this.getCurrentLocation()}' method.`);
     }
 
     return true;
@@ -191,7 +192,7 @@ export class MethodGenerator {
       return undefined;
     }
     if (opDecorators.length > 1) {
-      throw new GenerateMetadataError(`Only one OperationId decorator allowed in '${this.getCurrentLocation}' method.`);
+      throw new GenerateMetadataError(`Only one OperationId decorator allowed in '${this.getCurrentLocation()}' method.`);
     }
 
     const values = getDecoratorValues(opDecorators[0], this.current.typeChecker);
@@ -204,7 +205,7 @@ export class MethodGenerator {
       return this.parentTags;
     }
     if (tagsDecorators.length > 1) {
-      throw new GenerateMetadataError(`Only one Tags decorator allowed in '${this.getCurrentLocation}' method.`);
+      throw new GenerateMetadataError(`Only one Tags decorator allowed in '${this.getCurrentLocation()}' method.`);
     }
 
     const tags = getDecoratorValues(tagsDecorators[0], this.current.typeChecker);
@@ -234,7 +235,7 @@ export class MethodGenerator {
     }
 
     if (hiddenDecorators.length > 1) {
-      throw new GenerateMetadataError(`Only one Hidden decorator allowed in '${this.getCurrentLocation}' method.`);
+      throw new GenerateMetadataError(`Only one Hidden decorator allowed in '${this.getCurrentLocation()}' method.`);
     }
 
     return true;

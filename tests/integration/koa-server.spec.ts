@@ -958,7 +958,7 @@ describe('Koa Server', () => {
           }
 
           verifyResponse(parsedError, res);
-          resolve();
+          resolve(undefined);
         });
     });
   }

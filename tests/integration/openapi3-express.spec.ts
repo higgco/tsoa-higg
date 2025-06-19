@@ -285,7 +285,7 @@ describe('OpenAPI3 Express Server', () => {
           }
 
           verifyResponse(parsedError, res);
-          resolve();
+          resolve(undefined);
         });
     });
   }

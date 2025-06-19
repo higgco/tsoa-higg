@@ -22,11 +22,11 @@ export function getJSDocTagNames(node: ts.Node) {
   if (node.kind === ts.SyntaxKind.Parameter) {
     const parameterName = ((node as any).name as ts.Identifier).text;
     tags = getJSDocTags(node.parent as any, tag => {
-      return tag.comment !== undefined && tag.comment.startsWith(parameterName);
+      return typeof tag.comment === 'string' && tag.comment.startsWith(parameterName);
     });
   } else {
     tags = getJSDocTags(node as any, tag => {
-      return tag.comment !== undefined;
+      return typeof tag.comment === 'string';
     });
   }
   return tags.map(tag => {

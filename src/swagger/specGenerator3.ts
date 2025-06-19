@@ -85,25 +85,30 @@ export class SpecGenerator3 extends SpecGenerator {
           type: 'http',
         } as Swagger.BasicSecurity3;
       } else if (definitions[key].type === 'oauth2') {
-        const definition = definitions[key] as Swagger.OAuth2PasswordSecurity &
-          Swagger.OAuth2ApplicationSecurity &
-          Swagger.OAuth2ImplicitSecurity &
-          Swagger.OAuth2AccessCodeSecurity &
-          Swagger.OAuth2Security3;
+        const definition = definitions[key] as
+          | Swagger.OAuth2PasswordSecurity
+          | Swagger.OAuth2ApplicationSecurity
+          | Swagger.OAuth2ImplicitSecurity
+          | Swagger.OAuth2AccessCodeSecurity
+          | Swagger.OAuth2Security3;
         const oauth = (defs[key] || {
           type: 'oauth2',
           description: definitions[key].description,
-          flows: definition.flows || {},
+          flows: (definition as any).flows || {},
         }) as Swagger.OAuth2Security3;
 
-        if (definition.flow === 'password') {
-          oauth.flows.password = { tokenUrl: definition.tokenUrl, scopes: definition.scopes || {} } as Swagger.OAuth2SecurityFlow3;
-        } else if (definition.flow === 'accessCode') {
-          oauth.flows.authorizationCode = { tokenUrl: definition.tokenUrl, authorizationUrl: definition.authorizationUrl, scopes: definition.scopes || {} } as Swagger.OAuth2SecurityFlow3;
-        } else if (definition.flow === 'application') {
-          oauth.flows.clientCredentials = { tokenUrl: definition.tokenUrl, scopes: definition.scopes || {} } as Swagger.OAuth2SecurityFlow3;
-        } else if (definition.flow === 'implicit') {
-          oauth.flows.implicit = { authorizationUrl: definition.authorizationUrl, scopes: definition.scopes || {} } as Swagger.OAuth2SecurityFlow3;
+        if ('flow' in definition && definition.flow === 'password') {
+          oauth.flows.password = { tokenUrl: (definition as any).tokenUrl, scopes: (definition as any).scopes || {} } as Swagger.OAuth2SecurityFlow3;
+        } else if ('flow' in definition && definition.flow === 'accessCode') {
+          oauth.flows.authorizationCode = {
+            tokenUrl: (definition as any).tokenUrl,
+            authorizationUrl: (definition as any).authorizationUrl,
+            scopes: (definition as any).scopes || {},
+          } as Swagger.OAuth2SecurityFlow3;
+        } else if ('flow' in definition && definition.flow === 'application') {
+          oauth.flows.clientCredentials = { tokenUrl: (definition as any).tokenUrl, scopes: (definition as any).scopes || {} } as Swagger.OAuth2SecurityFlow3;
+        } else if ('flow' in definition && definition.flow === 'implicit') {
+          oauth.flows.implicit = { authorizationUrl: (definition as any).authorizationUrl, scopes: (definition as any).scopes || {} } as Swagger.OAuth2SecurityFlow3;
         }
 
         defs[key] = oauth;

@@ -11,7 +11,7 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
 
   const tags = getJSDocTags(parameter.parent, tag => {
     return getParameterTagSupport().some(value => {
-      if (!tag.comment) {
+      if (!tag.comment || typeof tag.comment !== 'string') {
         return false;
       }
       return value === tag.tagName.text && tag.comment.startsWith(parameterName);
@@ -42,7 +42,7 @@ export function getParameterValidators(parameter: ts.ParameterDeclaration, param
 
   return tags.reduce(
     (validateObj, tag) => {
-      if (!tag.comment) {
+      if (!tag.comment || typeof tag.comment !== 'string') {
         return validateObj;
       }
 
@@ -137,7 +137,7 @@ export function getPropertyValidators(property: ts.PropertyDeclaration | ts.Prop
   return tags.reduce(
     (validateObj, tag) => {
       const name = tag.tagName.text;
-      const comment = tag.comment;
+      const comment = typeof tag.comment === 'string' ? tag.comment : undefined;
       const value = getValue(comment);
 
       switch (name) {
