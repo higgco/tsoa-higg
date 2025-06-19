@@ -48,7 +48,7 @@
   "author": "Luke Autry <lukeautry@gmail.com> (http://www.lukeautry.com)",
   "license": "MIT",
   "dependencies": {
-    "@koa/router": "^8.0.8",
+    "@koa/router": "^12.0.2",
     "@types/koa__router": "^8.0.2",
     "fs-extra": "^8.1.0",
     "handlebars": "^4.5.3",
@@ -97,7 +97,7 @@
     "prettier": "1.18.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.0",
-    "sinon": "^7.5.0",
+    "sinon": "^20.0.0",
     "supertest": "^4.0.2",
     "ts-node": "^8.3.0",
     "tslint": "^5.19.0"
