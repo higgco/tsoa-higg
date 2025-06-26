@@ -674,6 +674,16 @@ describe('ValidationService', () => {
       expect(error[`${name}.$2`].value).to.equal(true);
     });
 
+    it('should error on invalid array enum value', () => {
+      const name = 'name';
+      const error: any = {};
+      const values = ['WRONG', 'HI'];
+      const result = new ValidationService({}).validateArray(name, values, error, {}, { dataType: 'enum', enums: ['LO', 'HI'] });
+      expect(result).to.deep.equal([undefined, 'HI']);
+      expect(error[`${name}.$0`].message).to.equal("should be one of the following; ['LO', 'HI']");
+      expect(error[`${name}.$0`].value).to.equal('WRONG');
+    });
+
     it('should array minItems validate', () => {
       const name = 'name';
       const value = [80, 10, 199];
